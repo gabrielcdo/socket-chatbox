@@ -1,3 +1,4 @@
+from ast import For
 import socket
 import threading 
 from typing import Tuple
@@ -12,9 +13,17 @@ print(SERVER)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
+clients = []
+def distribute_msg(conn:socket.socket,msg:str):
+    for client in clients:
+        if client != conn:
+            try:
+                client.send(msg.encode(FORMAT))
+            except socket.error as e:
+                print("Error sending data: %s" % e)
 def handle_client(conn:socket.socket,addr:Tuple):
     print(f"[NEW CONNECTION] {addr} connected.")
-
+    clients.append(conn)
     connected = True
     while connected: 
         msg_length = conn.recv(HEADER).decode(FORMAT)
@@ -24,20 +33,20 @@ def handle_client(conn:socket.socket,addr:Tuple):
             print(f"[{addr}] [{msg}]")
             if msg == DISCONNECT_MESSAGE:
                 connected = False
-            conn.send("MSG received".encode(FORMAT))
+            distribute_msg(conn,msg)
+     
     conn.close()
 
-def start():
+def start_server():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     while True:
         conn , addr = server.accept() # wait for a new connection for the server
-        print(type(conn))
-        print(type(addr))
+        distribute_msg(conn,'enter in the chat')
         thread = threading.Thread(target=handle_client, args =(conn,addr))
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1}")
    
-
-print("[STARTING] Server is starting...")
-start()
+if __name__ == "__main__":
+    print("[STARTING] Server is starting...")
+    start_server()
