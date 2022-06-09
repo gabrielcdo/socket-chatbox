@@ -1,4 +1,3 @@
-from ast import For
 import socket
 import threading 
 from typing import Tuple
@@ -21,6 +20,7 @@ def distribute_msg(conn:socket.socket,msg:str):
                 client.send(msg.encode(FORMAT))
             except socket.error as e:
                 print("Error sending data: %s" % e)
+                
 def handle_client(conn:socket.socket,addr:Tuple):
     print(f"[NEW CONNECTION] {addr} connected.")
     clients.append(conn)
@@ -42,7 +42,6 @@ def start_server():
     print(f"[LISTENING] Server is listening on {SERVER}")
     while True:
         conn , addr = server.accept() # wait for a new connection for the server
-        distribute_msg(conn,'enter in the chat')
         thread = threading.Thread(target=handle_client, args =(conn,addr))
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1}")

@@ -19,6 +19,7 @@ def send_msg(conn:socket.socket,msg:str):
     conn.send(message)
 
 def wait_msg(client:Client):
+    send_msg(client.conn, f'{client.user} enter in the chat')
     while True:
         message = input().strip() 
         message = f'<{client.user}> {message}'
@@ -34,7 +35,7 @@ def receive_msg(client:Client):
             print("Error receiving data: %s" % e)
 
 def start_client():
-    user =input('Enter username')
+    user =input('Enter username:    ')
     client_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_conn.connect(ADDR)
     client = Client(conn=client_conn,user=user)
